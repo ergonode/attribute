@@ -7,10 +7,10 @@
 
 declare(strict_types = 1);
 
-namespace Ergonode\Attribute\Persistence\Dbal\Projector\Group;
+namespace Ergonode\Attribute\Persistence\Dbal\Projector;
 
 use Doctrine\DBAL\Connection;
-use Ergonode\Attribute\Domain\Event\AttributeGroupAddedEvent;
+use Ergonode\Attribute\Domain\Event\Attribute\AttributeDeletedEvent;
 use Ergonode\Core\Domain\Entity\AbstractId;
 use Ergonode\EventSourcing\Infrastructure\DomainEventInterface;
 use Ergonode\EventSourcing\Infrastructure\Exception\UnsupportedEventException;
@@ -18,9 +18,9 @@ use Ergonode\EventSourcing\Infrastructure\Projector\DomainEventProjectorInterfac
 
 /**
  */
-class AttributeGroupAddedEventProjector implements DomainEventProjectorInterface
+class AttributeDeletedEventProjector implements DomainEventProjectorInterface
 {
-    private const TABLE = 'attribute_group_attribute';
+    private const TABLE = 'attribute';
 
     /**
      * @var Connection
@@ -40,7 +40,7 @@ class AttributeGroupAddedEventProjector implements DomainEventProjectorInterface
      */
     public function supports(DomainEventInterface $event): bool
     {
-        return $event instanceof AttributeGroupAddedEvent;
+        return $event instanceof AttributeDeletedEvent;
     }
 
     /**
@@ -48,15 +48,16 @@ class AttributeGroupAddedEventProjector implements DomainEventProjectorInterface
      */
     public function projection(AbstractId $aggregateId, DomainEventInterface $event): void
     {
-        if (!$this->supports($event)) {
-            throw new UnsupportedEventException($event, AttributeGroupAddedEvent::class);
+        if (!$event instanceof AttributeDeletedEvent) {
+            throw new UnsupportedEventException($event, AttributeDeletedEvent::class);
         }
 
-        $this->connection->insert(
+        // @todo What we should do with unused values?
+
+        $this->connection->delete(
             self::TABLE,
             [
-                'attribute_id' => $aggregateId->getValue(),
-                'attribute_group_id' => $event->getGroupId()->getValue(),
+                'id' => $aggregateId->getValue(),
             ]
         );
     }
