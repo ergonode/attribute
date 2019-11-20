@@ -7,10 +7,10 @@
 
 declare(strict_types = 1);
 
-namespace Ergonode\Attribute\Persistence\Dbal\Projector;
+namespace Ergonode\Attribute\Persistence\Dbal\Projector\Attribute;
 
 use Doctrine\DBAL\Connection;
-use Ergonode\Attribute\Domain\Event\Attribute\AttributeArrayParameterChangeEvent;
+use Ergonode\Attribute\Domain\Event\Attribute\AttributeParameterChangeEvent;
 use Ergonode\Core\Domain\Entity\AbstractId;
 use Ergonode\EventSourcing\Infrastructure\DomainEventInterface;
 use Ergonode\EventSourcing\Infrastructure\Exception\UnsupportedEventException;
@@ -19,7 +19,7 @@ use JMS\Serializer\SerializerInterface;
 
 /**
  */
-class AttributeArrayParameterChangeEventProjector implements DomainEventProjectorInterface
+class AttributeParameterChangeEventProjector implements DomainEventProjectorInterface
 {
     private const TABLE_PARAMETER = 'attribute_parameter';
 
@@ -48,7 +48,7 @@ class AttributeArrayParameterChangeEventProjector implements DomainEventProjecto
      */
     public function supports(DomainEventInterface $event): bool
     {
-        return $event instanceof AttributeArrayParameterChangeEvent;
+        return $event instanceof AttributeParameterChangeEvent;
     }
 
     /**
@@ -57,7 +57,7 @@ class AttributeArrayParameterChangeEventProjector implements DomainEventProjecto
     public function projection(AbstractId $aggregateId, DomainEventInterface $event): void
     {
         if (!$this->supports($event)) {
-            throw new UnsupportedEventException($event, AttributeArrayParameterChangeEvent::class);
+            throw new UnsupportedEventException($event, AttributeParameterChangeEvent::class);
         }
 
         if (!empty($event->getTo())) {
