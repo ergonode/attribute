@@ -7,10 +7,10 @@
 
 declare(strict_types = 1);
 
-namespace Ergonode\Attribute\Persistence\Dbal\Projector;
+namespace Ergonode\Attribute\Persistence\Dbal\Projector\Attribute;
 
 use Doctrine\DBAL\Connection;
-use Ergonode\Attribute\Domain\Event\Attribute\AttributeSystemChangedEvent;
+use Ergonode\Attribute\Domain\Event\Attribute\AttributeDeletedEvent;
 use Ergonode\Core\Domain\Entity\AbstractId;
 use Ergonode\EventSourcing\Infrastructure\DomainEventInterface;
 use Ergonode\EventSourcing\Infrastructure\Exception\UnsupportedEventException;
@@ -18,8 +18,10 @@ use Ergonode\EventSourcing\Infrastructure\Projector\DomainEventProjectorInterfac
 
 /**
  */
-class AttributeSystemChangedEventProjector implements DomainEventProjectorInterface
+class AttributeDeletedEventProjector implements DomainEventProjectorInterface
 {
+    private const TABLE = 'attribute';
+
     /**
      * @var Connection
      */
@@ -38,7 +40,7 @@ class AttributeSystemChangedEventProjector implements DomainEventProjectorInterf
      */
     public function supports(DomainEventInterface $event): bool
     {
-        return $event instanceof AttributeSystemChangedEvent;
+        return $event instanceof AttributeDeletedEvent;
     }
 
     /**
@@ -46,20 +48,16 @@ class AttributeSystemChangedEventProjector implements DomainEventProjectorInterf
      */
     public function projection(AbstractId $aggregateId, DomainEventInterface $event): void
     {
-        if (!$this->supports($event)) {
-            throw new UnsupportedEventException($event, AttributeSystemChangedEvent::class);
+        if (!$event instanceof AttributeDeletedEvent) {
+            throw new UnsupportedEventException($event, AttributeDeletedEvent::class);
         }
 
-        $this->connection->update(
-            'public.attribute',
+        // @todo What we should do with unused values?
+
+        $this->connection->delete(
+            self::TABLE,
             [
-                'system' => $event->getTo(),
-            ],
-            [
-                'attribute_id' => $aggregateId,
-            ],
-            [
-                'system' => \PDO::PARAM_BOOL,
+                'id' => $aggregateId->getValue(),
             ]
         );
     }
