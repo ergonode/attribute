@@ -7,15 +7,10 @@
 
 declare(strict_types = 1);
 
-namespace Ergonode\Attribute\Application\Controller\Api\Attribute;
+namespace Ergonode\Attribute\Application\Controller\Api\Option;
 
 use Ergonode\Api\Application\Exception\FormValidationHttpException;
-use Ergonode\Api\Application\Response\EmptyResponse;
-use Ergonode\Attribute\Application\Form\AttributeUpdateForm;
-use Ergonode\Attribute\Application\Form\Model\UpdateAttributeFormModel;
-use Ergonode\Attribute\Domain\Command\UpdateAttributeCommand;
 use Ergonode\Attribute\Domain\Entity\AbstractAttribute;
-use Ergonode\Attribute\Domain\ValueObject\AttributeType;
 use Ergonode\Core\Domain\ValueObject\TranslatableString;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
@@ -24,19 +19,29 @@ use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\PropertyAccess\Exception\InvalidPropertyPathException;
 use Symfony\Component\Routing\Annotation\Route;
+use Ergonode\Attribute\Application\Form\Model\Option\SimpleOptionModel;
+use Ergonode\Attribute\Application\Form\SimpleOptionForm;
+use Ergonode\Attribute\Domain\ValueObject\OptionKey;
+use Ergonode\Api\Application\Response\CreatedResponse;
+use Ergonode\Attribute\Domain\Entity\AbstractOption;
+use Ergonode\Attribute\Domain\Command\Option\UpdateOptionCommand;
 use Ergonode\EventSourcing\Infrastructure\Bus\CommandBusInterface;
 
 /**
  * @Route(
- *     name="ergonode_attribute_change",
- *     path="/attributes/{attribute}",
+ *     name="ergonode_option_change",
+ *     path="/attributes/{attribute}/options/{option}",
  *     methods={"PUT"},
- *     requirements={"attribute" = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"}
+ *     requirements={
+ *        "attribute" = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}",
+ *        "option" = "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"
+ *     }
  * )
  */
-class AttributeChangeAction
+class OptionChangeAction
 {
     /**
      * @var CommandBusInterface
@@ -73,9 +78,9 @@ class AttributeChangeAction
      *     in="body",
      *     description="Add attribute",
      *     required=true,
-     *     @SWG\Schema(ref="#/definitions/attribute")
+     *     @SWG\Schema(ref="#/definitions/option")
      * )
-     *  @SWG\Parameter(
+     * @SWG\Parameter(
      *     name="language",
      *     in="path",
      *     type="string",
@@ -85,7 +90,7 @@ class AttributeChangeAction
      * )
      * @SWG\Response(
      *     response=200,
-     *     description="Returns attribute",
+     *     description="Returns option",
      * )
      * @SWG\Response(
      *     response=400,
@@ -98,34 +103,37 @@ class AttributeChangeAction
      * )
      *
      * @ParamConverter(class="Ergonode\Attribute\Domain\Entity\AbstractAttribute")
+     * @ParamConverter(class="Ergonode\Attribute\Domain\Entity\AbstractOption")
      *
      * @param AbstractAttribute $attribute
+     * @param AbstractOption    $option
      * @param Request           $request
      *
      * @return Response
+     *
+     * @throws \Exception
      */
-    public function __invoke(AbstractAttribute $attribute, Request $request): Response
+    public function __invoke(AbstractAttribute $attribute, AbstractOption $option, Request $request): Response
     {
         try {
-            $model = new UpdateAttributeFormModel(new AttributeType($attribute->getType()));
-            $form = $this->formFactory->create(AttributeUpdateForm::class, $model, ['method' => Request::METHOD_PUT]);
+            $model = new SimpleOptionModel();
+            $form = $this->formFactory->create(SimpleOptionForm::class, $model, ['method' => Request::METHOD_PUT]);
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
-                /** @var UpdateAttributeFormModel $data */
+                /** @var SimpleOptionModel $data */
                 $data = $form->getData();
 
-                $command = new UpdateAttributeCommand(
+                $command = new UpdateOptionCommand(
+                    $option->getId(),
                     $attribute->getId(),
-                    new TranslatableString($data->label),
-                    new TranslatableString($data->hint),
-                    new TranslatableString($data->placeholder),
-                    $data->groups,
-                    (array) $data->parameters
+                    new OptionKey($data->code),
+                    new TranslatableString($data->label)
                 );
+
                 $this->commandBus->dispatch($command);
 
-                return new EmptyResponse();
+                return new CreatedResponse($command->getId());
             }
         } catch (InvalidPropertyPathException $exception) {
             throw new BadRequestHttpException('Invalid JSON format');
