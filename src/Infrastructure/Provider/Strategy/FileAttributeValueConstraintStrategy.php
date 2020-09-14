@@ -10,16 +10,16 @@ declare(strict_types = 1);
 namespace Ergonode\Attribute\Infrastructure\Provider\Strategy;
 
 use Ergonode\Attribute\Domain\Entity\AbstractAttribute;
-use Ergonode\Attribute\Domain\Entity\Attribute\GalleryAttribute;
 use Ergonode\Attribute\Infrastructure\Provider\AttributeValueConstraintStrategyInterface;
 use Ergonode\Multimedia\Domain\Query\MultimediaQueryInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Constraints\Choice;
 use Symfony\Component\Validator\Constraints\Collection;
+use Ergonode\Attribute\Domain\Entity\Attribute\FileAttribute;
 
 /**
  */
-class GalleryAttributeValueConstraintStrategy implements AttributeValueConstraintStrategyInterface
+class FileAttributeValueConstraintStrategy implements AttributeValueConstraintStrategyInterface
 {
     /**
      * @var MultimediaQueryInterface
@@ -39,7 +39,7 @@ class GalleryAttributeValueConstraintStrategy implements AttributeValueConstrain
      */
     public function supports(AbstractAttribute $attribute): bool
     {
-        return $attribute instanceof GalleryAttribute;
+        return $attribute instanceof FileAttribute;
     }
 
     /**

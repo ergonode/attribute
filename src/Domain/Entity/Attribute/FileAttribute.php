@@ -9,11 +9,13 @@ declare(strict_types = 1);
 
 namespace Ergonode\Attribute\Domain\Entity\Attribute;
 
+use JMS\Serializer\Annotation as JMS;
+
 /**
  */
-class GalleryAttribute extends AbstractCollectionAttribute
+class FileAttribute extends AbstractCollectionAttribute
 {
-    public const TYPE = 'GALLERY';
+    public const TYPE = 'FILE';
 
     /**
      * @return string
