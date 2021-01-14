@@ -8,14 +8,14 @@ declare(strict_types=1);
 
 namespace Ergonode\Attribute\Tests\Application\Validator;
 
-use Ergonode\Attribute\Application\Validator\UniqueAttributeGroupCodeConstraint;
-use Ergonode\Attribute\Application\Validator\UniqueAttributeGroupCodeConstraintValidator;
+use Ergonode\Attribute\Application\Validator\AttributeGroupCodeUnique;
+use Ergonode\Attribute\Application\Validator\AttributeGroupCodeUniqueValidator;
 use Ergonode\Attribute\Domain\Query\AttributeGroupQueryInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Test\ConstraintValidatorTestCase;
 
-class UniqueAttributeGroupCodeConstraintValidatorTest extends ConstraintValidatorTestCase
+class AttributeGroupCodeUniqueValidatorTest extends ConstraintValidatorTestCase
 {
     /**
      * @var AttributeGroupQueryInterface|MockObject
@@ -31,7 +31,7 @@ class UniqueAttributeGroupCodeConstraintValidatorTest extends ConstraintValidato
     public function testWrongValueProvided(): void
     {
         $this->expectException(\Symfony\Component\Validator\Exception\ValidatorException::class);
-        $this->validator->validate(new \stdClass(), new UniqueAttributeGroupCodeConstraint());
+        $this->validator->validate(new \stdClass(), new AttributeGroupCodeUnique());
     }
 
     public function testWrongConstraintProvided(): void
@@ -44,14 +44,14 @@ class UniqueAttributeGroupCodeConstraintValidatorTest extends ConstraintValidato
 
     public function testCorrectEmptyValidation(): void
     {
-        $this->validator->validate('', new UniqueAttributeGroupCodeConstraint());
+        $this->validator->validate('', new AttributeGroupCodeUnique());
 
         $this->assertNoViolation();
     }
 
     public function testCorrectValueValidation(): void
     {
-        $this->validator->validate('code', new UniqueAttributeGroupCodeConstraint());
+        $this->validator->validate('code', new AttributeGroupCodeUnique());
 
         $this->assertNoViolation();
     }
@@ -59,7 +59,7 @@ class UniqueAttributeGroupCodeConstraintValidatorTest extends ConstraintValidato
     public function testCodeExistsValidation(): void
     {
         $this->query->method('checkAttributeGroupExistsByCode')->willReturn(true);
-        $constraint = new UniqueAttributeGroupCodeConstraint();
+        $constraint = new AttributeGroupCodeUnique();
         $value = 'code';
         $this->validator->validate($value, $constraint);
 
@@ -67,8 +67,8 @@ class UniqueAttributeGroupCodeConstraintValidatorTest extends ConstraintValidato
         $assertion->assertRaised();
     }
 
-    protected function createValidator(): UniqueAttributeGroupCodeConstraintValidator
+    protected function createValidator(): AttributeGroupCodeUniqueValidator
     {
-        return new UniqueAttributeGroupCodeConstraintValidator($this->query);
+        return new AttributeGroupCodeUniqueValidator($this->query);
     }
 }

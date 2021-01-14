@@ -8,17 +8,17 @@ declare(strict_types=1);
 
 namespace Ergonode\Attribute\Tests\Application\Validator;
 
-use Ergonode\Attribute\Application\Validator\AttributeGroupCodeConstraint;
-use Ergonode\Attribute\Application\Validator\AttributeGroupCodeConstraintValidator;
+use Ergonode\Attribute\Application\Validator\AttributeCode;
+use Ergonode\Attribute\Application\Validator\AttributeCodeValidator;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Test\ConstraintValidatorTestCase;
 
-class AttributeGroupCodeConstraintValidatorTest extends ConstraintValidatorTestCase
+class AttributeCodeValidatorTest extends ConstraintValidatorTestCase
 {
     public function testWrongValueProvided(): void
     {
         $this->expectException(\Symfony\Component\Validator\Exception\UnexpectedTypeException::class);
-        $this->validator->validate(new \stdClass(), new AttributeGroupCodeConstraint());
+        $this->validator->validate(new \stdClass(), new AttributeCode());
     }
 
     public function testWrongConstraintProvided(): void
@@ -31,21 +31,21 @@ class AttributeGroupCodeConstraintValidatorTest extends ConstraintValidatorTestC
 
     public function testCorrectEmptyValidation(): void
     {
-        $this->validator->validate('', new AttributeGroupCodeConstraint());
+        $this->validator->validate('', new AttributeCode());
 
         $this->assertNoViolation();
     }
 
     public function testCorrectValueValidation(): void
     {
-        $this->validator->validate('code', new AttributeGroupCodeConstraint());
+        $this->validator->validate('code', new AttributeCode());
 
         $this->assertNoViolation();
     }
 
     public function testInCorrectLongValueValidation(): void
     {
-        $constraint = new AttributeGroupCodeConstraint();
+        $constraint = new AttributeCode();
         $value = 'CODE_NOT_VALID_'.str_repeat('a', 114);
         $this->validator->validate($value, $constraint);
 
@@ -55,7 +55,7 @@ class AttributeGroupCodeConstraintValidatorTest extends ConstraintValidatorTestC
 
     public function testInCorrectShortValueValidation(): void
     {
-        $constraint = new AttributeGroupCodeConstraint();
+        $constraint = new AttributeCode();
         $value = ' ';
         $this->validator->validate($value, $constraint);
 
@@ -63,17 +63,18 @@ class AttributeGroupCodeConstraintValidatorTest extends ConstraintValidatorTestC
         $assertion->assertRaised();
     }
 
-    public function testAttributeGroupCodeInvalidValidation(): void
+    public function testInCorrectValueValidation(): void
     {
-        $value = 'fes//efs..';
-        $this->validator->validate($value, new AttributeGroupCodeConstraint());
-        $constraint = new AttributeGroupCodeConstraint();
+        $constraint = new AttributeCode();
+        $value = 'SKU!!';
+        $this->validator->validate($value, $constraint);
+
         $assertion = $this->buildViolation($constraint->regexMessage);
         $assertion->assertRaised();
     }
 
-    protected function createValidator(): AttributeGroupCodeConstraintValidator
+    protected function createValidator(): AttributeCodeValidator
     {
-        return new AttributeGroupCodeConstraintValidator();
+        return new AttributeCodeValidator();
     }
 }

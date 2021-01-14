@@ -7,21 +7,21 @@
 
 declare(strict_types=1);
 
-namespace Ergonode\Attribute\Infrastructure\Validator;
+namespace Ergonode\Attribute\Application\Validator;
 
+use Ergonode\SharedKernel\Domain\Aggregate\AttributeId;
+use Ergonode\Attribute\Domain\Repository\AttributeRepositoryInterface;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
-use Ergonode\Attribute\Domain\Repository\AttributeGroupRepositoryInterface;
-use Ergonode\SharedKernel\Domain\Aggregate\AttributeGroupId;
 
-class AttributeGroupExistsValidator extends ConstraintValidator
+class AttributeExistsValidator extends ConstraintValidator
 {
-    private AttributeGroupRepositoryInterface $repository;
+    private AttributeRepositoryInterface $attributeRepository;
 
-    public function __construct(AttributeGroupRepositoryInterface $repository)
+    public function __construct(AttributeRepositoryInterface $attributeRepository)
     {
-        $this->repository = $repository;
+        $this->attributeRepository = $attributeRepository;
     }
 
     /**
@@ -32,8 +32,8 @@ class AttributeGroupExistsValidator extends ConstraintValidator
      */
     public function validate($value, Constraint $constraint): void
     {
-        if (!$constraint instanceof AttributeGroupExists) {
-            throw new UnexpectedTypeException($constraint, AttributeGroupExists::class);
+        if (!$constraint instanceof AttributeExists) {
+            throw new UnexpectedTypeException($constraint, AttributeExists::class);
         }
 
         if (null === $value || '' === $value) {
@@ -46,12 +46,12 @@ class AttributeGroupExistsValidator extends ConstraintValidator
 
         $value = (string) $value;
 
-        $attributeGroup = false;
-        if (AttributeGroupId::isValid($value)) {
-            $attributeGroup = $this->repository->load(new AttributeGroupId($value));
+        $attribute = false;
+        if (AttributeId::isValid($value)) {
+            $attribute = $this->attributeRepository->load(new AttributeId($value));
         }
 
-        if (!$attributeGroup) {
+        if (!$attribute) {
             $this->context->buildViolation($constraint->message)
                 ->setParameter('{{ value }}', $value)
                 ->addViolation();

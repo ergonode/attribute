@@ -7,14 +7,14 @@
 
 declare(strict_types=1);
 
-namespace Ergonode\Attribute\Infrastructure\Validator;
+namespace Ergonode\Attribute\Application\Validator;
 
 use Symfony\Component\Validator\Constraint;
 
 /**
  * @Annotation
  */
-class AttributeTypeExists extends Constraint
+class AttributeExists extends Constraint
 {
-    public string $message = 'Attribute type {{ value }} not exists.';
+    public string $message = 'Attribute {{ value }} not exists.';
 }

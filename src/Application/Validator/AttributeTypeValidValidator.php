@@ -7,15 +7,15 @@
 
 declare(strict_types=1);
 
-namespace Ergonode\Attribute\Infrastructure\Validator;
+namespace Ergonode\Attribute\Application\Validator;
 
-use Ergonode\SharedKernel\Domain\Aggregate\AttributeId;
 use Ergonode\Attribute\Domain\Repository\AttributeRepositoryInterface;
+use Ergonode\SharedKernel\Domain\Aggregate\AttributeId;
+use Symfony\Component\Form\Exception\UnexpectedTypeException;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
-use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
-class AttributeExistsValidator extends ConstraintValidator
+class AttributeTypeValidValidator extends ConstraintValidator
 {
     private AttributeRepositoryInterface $attributeRepository;
 
@@ -26,14 +26,14 @@ class AttributeExistsValidator extends ConstraintValidator
 
     /**
      * @param mixed                    $value
-     * @param AttributeExists|Constraint $constraint
+     * @param AttributeTypeValid|Constraint $constraint
      *
      * @throws \ReflectionException
      */
     public function validate($value, Constraint $constraint): void
     {
-        if (!$constraint instanceof AttributeExists) {
-            throw new UnexpectedTypeException($constraint, AttributeExists::class);
+        if (!$constraint instanceof AttributeTypeValid) {
+            throw new UnexpectedTypeException($constraint, AttributeTypeValid::class);
         }
 
         if (null === $value || '' === $value) {
@@ -46,12 +46,12 @@ class AttributeExistsValidator extends ConstraintValidator
 
         $value = (string) $value;
 
-        $attribute = false;
+        $attribute = null;
         if (AttributeId::isValid($value)) {
             $attribute = $this->attributeRepository->load(new AttributeId($value));
         }
 
-        if (!$attribute) {
+        if ($attribute && $attribute->getType() !== $constraint->type) {
             $this->context->buildViolation($constraint->message)
                 ->setParameter('{{ value }}', $value)
                 ->addViolation();
