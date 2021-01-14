@@ -1,5 +1,6 @@
 <?php
-/*
+
+/**
  * Copyright © Bold Brand Commerce Sp. z o.o. All rights reserved.
  * See LICENSE.txt for license details.
  */
@@ -13,7 +14,7 @@ use Symfony\Component\Validator\Constraint;
 /**
  * @Annotation
  */
-class UniqueAttributeGroupCodeConstraint extends Constraint
+class AttributeGroupExists extends Constraint
 {
-    public string $uniqueMessage = 'The value is not unique.';
+    public string $message = 'Attribute group not exists.';
 }

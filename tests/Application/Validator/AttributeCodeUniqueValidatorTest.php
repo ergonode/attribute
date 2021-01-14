@@ -8,14 +8,14 @@ declare(strict_types=1);
 
 namespace Ergonode\Attribute\Tests\Application\Validator;
 
-use Ergonode\Attribute\Application\Validator\UniqueAttributeCodeConstraint;
-use Ergonode\Attribute\Application\Validator\UniqueAttributeCodeConstraintValidator;
+use Ergonode\Attribute\Application\Validator\AttributeCodeUnique;
+use Ergonode\Attribute\Application\Validator\AttributeCodeUniqueValidator;
 use Ergonode\Attribute\Domain\Query\AttributeQueryInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\Test\ConstraintValidatorTestCase;
 
-class UniqueAttributeCodeConstraintValidatorTest extends ConstraintValidatorTestCase
+class AttributeCodeUniqueValidatorTest extends ConstraintValidatorTestCase
 {
     /**
      * @var AttributeQueryInterface|MockObject
@@ -31,7 +31,7 @@ class UniqueAttributeCodeConstraintValidatorTest extends ConstraintValidatorTest
     public function testWrongValueProvided(): void
     {
         $this->expectException(\Symfony\Component\Validator\Exception\ValidatorException::class);
-        $this->validator->validate(new \stdClass(), new UniqueAttributeCodeConstraint());
+        $this->validator->validate(new \stdClass(), new AttributeCodeUnique());
     }
 
     public function testWrongConstraintProvided(): void
@@ -44,14 +44,14 @@ class UniqueAttributeCodeConstraintValidatorTest extends ConstraintValidatorTest
 
     public function testCorrectEmptyValidation(): void
     {
-        $this->validator->validate('', new UniqueAttributeCodeConstraint());
+        $this->validator->validate('', new AttributeCodeUnique());
 
         $this->assertNoViolation();
     }
 
     public function testCorrectValueValidation(): void
     {
-        $this->validator->validate('code', new UniqueAttributeCodeConstraint());
+        $this->validator->validate('code', new AttributeCodeUnique());
 
         $this->assertNoViolation();
     }
@@ -60,7 +60,7 @@ class UniqueAttributeCodeConstraintValidatorTest extends ConstraintValidatorTest
     public function testCodeExistsValidation(): void
     {
         $this->query->method('checkAttributeExistsByCode')->willReturn(true);
-        $constraint = new UniqueAttributeCodeConstraint();
+        $constraint = new AttributeCodeUnique();
         $value = 'code';
         $this->validator->validate($value, $constraint);
 
@@ -68,8 +68,8 @@ class UniqueAttributeCodeConstraintValidatorTest extends ConstraintValidatorTest
         $assertion->assertRaised();
     }
 
-    protected function createValidator(): UniqueAttributeCodeConstraintValidator
+    protected function createValidator(): AttributeCodeUniqueValidator
     {
-        return new UniqueAttributeCodeConstraintValidator($this->query);
+        return new AttributeCodeUniqueValidator($this->query);
     }
 }

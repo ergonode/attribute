@@ -7,20 +7,21 @@
 
 declare(strict_types=1);
 
-namespace Ergonode\Attribute\Infrastructure\Validator;
+namespace Ergonode\Attribute\Application\Validator;
 
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
-use Ergonode\Attribute\Application\Provider\AttributeTypeProvider;
+use Ergonode\Attribute\Domain\Repository\AttributeGroupRepositoryInterface;
+use Ergonode\SharedKernel\Domain\Aggregate\AttributeGroupId;
 
-class AttributeTypeExistsValidator extends ConstraintValidator
+class AttributeGroupExistsValidator extends ConstraintValidator
 {
-    private AttributeTypeProvider $provider;
+    private AttributeGroupRepositoryInterface $repository;
 
-    public function __construct(AttributeTypeProvider $provider)
+    public function __construct(AttributeGroupRepositoryInterface $repository)
     {
-        $this->provider = $provider;
+        $this->repository = $repository;
     }
 
     /**
@@ -31,8 +32,8 @@ class AttributeTypeExistsValidator extends ConstraintValidator
      */
     public function validate($value, Constraint $constraint): void
     {
-        if (!$constraint instanceof AttributeTypeExists) {
-            throw new UnexpectedTypeException($constraint, AttributeTypeExists::class);
+        if (!$constraint instanceof AttributeGroupExists) {
+            throw new UnexpectedTypeException($constraint, AttributeGroupExists::class);
         }
 
         if (null === $value || '' === $value) {
@@ -45,9 +46,12 @@ class AttributeTypeExistsValidator extends ConstraintValidator
 
         $value = (string) $value;
 
-        $types = $this->provider->provide();
+        $attributeGroup = false;
+        if (AttributeGroupId::isValid($value)) {
+            $attributeGroup = $this->repository->load(new AttributeGroupId($value));
+        }
 
-        if (!in_array($value, $types)) {
+        if (!$attributeGroup) {
             $this->context->buildViolation($constraint->message)
                 ->setParameter('{{ value }}', $value)
                 ->addViolation();

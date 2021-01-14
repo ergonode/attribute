@@ -14,7 +14,7 @@ use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
 
-class UniqueAttributeGroupCodeConstraintValidator extends ConstraintValidator
+class AttributeGroupCodeUniqueValidator extends ConstraintValidator
 {
     private AttributeGroupQueryInterface $query;
 
@@ -25,12 +25,12 @@ class UniqueAttributeGroupCodeConstraintValidator extends ConstraintValidator
 
     /**
      * @param mixed                                    $value
-     * @param UniqueAttributeGroupCodeConstraint|Constraint $constraint
+     * @param AttributeGroupCodeUnique|Constraint $constraint
      */
     public function validate($value, Constraint $constraint): void
     {
-        if (!$constraint instanceof UniqueAttributeGroupCodeConstraint) {
-            throw new UnexpectedTypeException($constraint, UniqueAttributeGroupCodeConstraint::class);
+        if (!$constraint instanceof AttributeGroupCodeUnique) {
+            throw new UnexpectedTypeException($constraint, AttributeGroupCodeUnique::class);
         }
 
         if (null === $value || '' === $value) {

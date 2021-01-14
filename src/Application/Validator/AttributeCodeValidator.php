@@ -8,21 +8,21 @@ declare(strict_types=1);
 
 namespace Ergonode\Attribute\Application\Validator;
 
-use Ergonode\Attribute\Domain\ValueObject\AttributeGroupCode;
 use Symfony\Component\Validator\Constraint;
 use Symfony\Component\Validator\ConstraintValidator;
 use Symfony\Component\Validator\Exception\UnexpectedTypeException;
+use Ergonode\Attribute\Domain\ValueObject\AttributeCode as ValueObject;
 
-class AttributeGroupCodeConstraintValidator extends ConstraintValidator
+class AttributeCodeValidator extends ConstraintValidator
 {
     /**
-     * @param mixed                                   $value
-     * @param AttributeGroupCodeConstraint|Constraint $constraint
+     * @param mixed                        $value
+     * @param AttributeCode|Constraint $constraint
      */
     public function validate($value, Constraint $constraint): void
     {
-        if (!$constraint instanceof AttributeGroupCodeConstraint) {
-            throw new UnexpectedTypeException($constraint, AttributeGroupCodeConstraint::class);
+        if (!$constraint instanceof AttributeCode) {
+            throw new UnexpectedTypeException($constraint, AttributeCode::class);
         }
 
         if (null === $value || '' === $value) {
@@ -57,7 +57,7 @@ class AttributeGroupCodeConstraintValidator extends ConstraintValidator
             return;
         }
 
-        if (!AttributeGroupCode::isValid($value)) {
+        if (!ValueObject::isValid($value)) {
             $this->context->buildViolation($constraint->validMessage)
                 ->setParameter('{{ value }}', $value)
                 ->addViolation();

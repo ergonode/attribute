@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Ergonode\Attribute\Infrastructure\Validator;
+namespace Ergonode\Attribute\Application\Validator;
 
 use Symfony\Component\Validator\Constraint;
 

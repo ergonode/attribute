@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Ergonode\Attribute\Infrastructure\Validator;
+namespace Ergonode\Attribute\Application\Validator;
 
 use Ergonode\Attribute\Application\Form\Model\Option\SimpleOptionModel;
 use Ergonode\Attribute\Domain\Query\OptionQueryInterface;
