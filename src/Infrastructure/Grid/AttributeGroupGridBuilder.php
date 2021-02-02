@@ -10,29 +10,21 @@ declare(strict_types=1);
 namespace Ergonode\Attribute\Infrastructure\Grid;
 
 use Ergonode\Core\Domain\ValueObject\Language;
-use Ergonode\Grid\AbstractGrid;
 use Ergonode\Grid\Column\IntegerColumn;
 use Ergonode\Grid\Column\LinkColumn;
 use Ergonode\Grid\Column\TextColumn;
 use Ergonode\Grid\Filter\TextFilter;
 use Ergonode\Grid\GridConfigurationInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Ergonode\Grid\Grid;
+use Ergonode\Grid\GridBuilderInterface;
+use Ergonode\Grid\GridInterface;
+use Ergonode\Grid\Column\IdColumn;
 
-class AttributeGroupGrid extends AbstractGrid
+class AttributeGroupGridBuilder implements GridBuilderInterface
 {
-    public function init(GridConfigurationInterface $configuration, Language $language): void
+    public function build(GridConfigurationInterface $configuration, Language $language): GridInterface
     {
-        $id = new TextColumn('id', 'Id', new TextFilter());
-        $id->setVisible(false);
-        $this->addColumn('id', $id);
-        $this->addColumn('code', new TextColumn('code', 'System name', new TextFilter()));
-        $this->addColumn('name', new TextColumn('name', 'Name', new TextFilter()));
-        $this->
-        addColumn(
-            'elements_count',
-            new IntegerColumn('elements_count', 'Number of attributes', new TextFilter())
-        );
-
         $links = [
             'get' => [
                 'privilege' => 'ATTRIBUTE_GROUP_READ',
@@ -52,6 +44,18 @@ class AttributeGroupGrid extends AbstractGrid
                 'method' => Request::METHOD_DELETE,
             ],
         ];
-        $this->addColumn('_links', new LinkColumn('hal', $links));
+
+        $grid = new Grid();
+        $grid
+            ->addColumn('id', new IdColumn('id'))
+            ->addColumn('code', new TextColumn('code', 'System name', new TextFilter()))
+            ->addColumn('name', new TextColumn('name', 'Name', new TextFilter()))
+            ->addColumn(
+                'elements_count',
+                new IntegerColumn('elements_count', 'Number of attributes', new TextFilter())
+            )
+            ->addColumn('_links', new LinkColumn('hal', $links));
+
+        return $grid;
     }
 }
