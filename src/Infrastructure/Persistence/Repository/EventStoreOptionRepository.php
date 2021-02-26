@@ -10,15 +10,14 @@ declare(strict_types=1);
 namespace Ergonode\Attribute\Infrastructure\Persistence\Repository;
 
 use Doctrine\DBAL\DBALException;
-use Ergonode\Attribute\Domain\Entity\AttributeGroup;
-use Ergonode\Attribute\Domain\Event\Group\AttributeGroupDeletedEvent;
-use Ergonode\Attribute\Domain\Repository\AttributeGroupRepositoryInterface;
-use Ergonode\EventSourcing\Domain\AbstractAggregateRoot;
+use Ergonode\Attribute\Domain\Entity\AbstractOption;
+use Ergonode\Attribute\Domain\Event\Option\OptionRemovedEvent;
+use Ergonode\Attribute\Domain\Repository\OptionRepositoryInterface;
 use Ergonode\EventSourcing\Infrastructure\Manager\EventStoreManager;
-use Ergonode\SharedKernel\Domain\Aggregate\AttributeGroupId;
+use Ergonode\SharedKernel\Domain\AggregateId;
 use Webmozart\Assert\Assert;
 
-class DbalAttributeGroupRepository implements AttributeGroupRepositoryInterface
+class EventStoreOptionRepository implements OptionRepositoryInterface
 {
     private EventStoreManager $manager;
 
@@ -28,14 +27,13 @@ class DbalAttributeGroupRepository implements AttributeGroupRepositoryInterface
     }
 
     /**
-     * @return AbstractAggregateRoot|AttributeGroup
-     *
      * @throws \ReflectionException
      */
-    public function load(AttributeGroupId $id): ?AbstractAggregateRoot
+    public function load(AggregateId $id): ?AbstractOption
     {
+        /** @var AbstractOption|null $aggregate */
         $aggregate = $this->manager->load($id);
-        Assert::nullOrIsInstanceOf($aggregate, AttributeGroup::class);
+        Assert::nullOrIsInstanceOf($aggregate, AbstractOption::class);
 
         return $aggregate;
     }
@@ -43,7 +41,7 @@ class DbalAttributeGroupRepository implements AttributeGroupRepositoryInterface
     /**
      * @throws DBALException
      */
-    public function save(AbstractAggregateRoot $aggregateRoot): void
+    public function save(AbstractOption $aggregateRoot): void
     {
         $this->manager->save($aggregateRoot);
     }
@@ -53,9 +51,9 @@ class DbalAttributeGroupRepository implements AttributeGroupRepositoryInterface
      *
      * @throws \Exception
      */
-    public function delete(AbstractAggregateRoot $aggregateRoot): void
+    public function delete(AbstractOption $aggregateRoot): void
     {
-        $aggregateRoot->apply(new AttributeGroupDeletedEvent($aggregateRoot->getId()));
+        $aggregateRoot->apply(new OptionRemovedEvent($aggregateRoot->getId()));
         $this->save($aggregateRoot);
 
         $this->manager->delete($aggregateRoot);
